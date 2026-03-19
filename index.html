@@ -471,15 +471,16 @@
                     </div>
                 </body>
                 </html>
-            `;
-            
-            previewFrame.contentDocument.write(sampleHTML);
-            previewFrame.contentDocument.close();
-            
-            setTimeout(() => {
-                extractElements();
-            }, 100);
-        }
+             `;
+             
+             previewFrame.contentDocument.write(sampleHTML);
+             previewFrame.contentDocument.close();
+             
+             setTimeout(() => {
+                 injectIframeStyles(previewFrame.contentDocument);
+                 extractElements();
+             }, 100);
+         }
 
         function showSelectionRect(index) {
             if (selectedBox) {
@@ -577,6 +578,26 @@
             }
         }
 
+        function injectIframeStyles(iframeDoc) {
+            const style = iframeDoc.createElement('style');
+            style.textContent = `
+                .selected-box {
+                    position: absolute;
+                    border: 3px solid #4ecdc4;
+                    box-sizing: border-box;
+                    pointer-events: none;
+                    background: rgba(78, 205, 196, 0.2);
+                    z-index: 9999;
+                }
+                .selected {
+                    outline: 3px solid #4ecdc4 !important;
+                    outline-offset: 2px !important;
+                    z-index: 9998 !important;
+                }
+            `;
+            iframeDoc.head.appendChild(style);
+        }
+
         function selectElement(index) {
             if (selectedElement !== null && elementsData[selectedElement]) {
                 const prevItem = elementList.children[selectedElement];
@@ -585,6 +606,7 @@
                 const prevData = elementsData[selectedElement];
                 if (prevData && prevData.element) {
                     prevData.element.classList.remove('selected');
+                    prevData.element.classList.remove('selected-box-target');
                 }
             }
             
@@ -611,6 +633,7 @@
                 currentY = elementData.position.y;
                 currentScale = 1;
                 
+                elementData.element.classList.add('selected-box-target');
                 elementData.element.addEventListener('mousedown', handleDragStart);
             }
         }
