@@ -496,8 +496,8 @@
             
             selectedBox = iframeDoc.createElement('div');
             selectedBox.className = 'selected-box';
-            selectedBox.style.left = elementData.position.x + 'px';
-            selectedBox.style.top = elementData.position.y + 'px';
+            selectedBox.style.left = iframeRect.left + elementData.position.x + 'px';
+            selectedBox.style.top = iframeRect.top + elementData.position.y + 'px';
             selectedBox.style.width = elementData.position.width + 'px';
             selectedBox.style.height = elementData.position.height + 'px';
             iframeDoc.body.appendChild(selectedBox);
@@ -606,6 +606,15 @@
             const elementData = elementsData[index];
             
             if (elementData) {
+                const rect = elementData.element.getBoundingClientRect();
+                const iframeRect = previewFrame.getBoundingClientRect();
+                
+                currentX = rect.left - iframeRect.left;
+                currentY = rect.top - iframeRect.top;
+                
+                elementData.position.x = currentX;
+                elementData.position.y = currentY;
+                
                 showSelectionRect(index);
                 
                 const item = elementList.children[index];
@@ -614,15 +623,13 @@
                 selectedElementName.textContent = `${elementData.tag} ${elementData.className ? '.' + elementData.className.split(' ')[0] : ''}`;
                 elementType.value = elementData.tag;
                 elementClass.value = elementData.className;
-                elementPosition.value = `${Math.round(elementData.position.x)}, ${Math.round(elementData.position.y)}`;
-                elementSize.value = `${Math.round(elementData.position.width)} × ${Math.round(elementData.position.height)}`;
+                elementPosition.value = `${Math.round(currentX)}, ${Math.round(currentY)}`;
+                elementSize.value = `${Math.round(rect.width)} × ${Math.round(rect.height)}`;
                 elementNotes.value = '';
                 noteType.value = 'position';
                 
                 propertiesPanel.style.display = 'block';
                 
-                currentX = elementData.position.x;
-                currentY = elementData.position.y;
                 currentScale = 1;
                 
                 elementData.element.classList.add('selected-box-target');
@@ -637,19 +644,14 @@
             e.stopPropagation();
             
             const elementData = elementsData[selectedElement];
-            const iframeDoc = previewFrame.contentDocument;
-            
-            const rect = elementData.element.getBoundingClientRect();
             const iframeRect = previewFrame.getBoundingClientRect();
-            
-            const elementX = rect.left - iframeRect.left;
-            const elementY = rect.top - iframeRect.top;
+            const iframeDoc = previewFrame.contentDocument;
             
             const clickX = e.clientX - iframeRect.left;
             const clickY = e.clientY - iframeRect.top;
             
-            dragOffsetX = clickX - elementX;
-            dragOffsetY = clickY - elementY;
+            dragOffsetX = clickX - currentX;
+            dragOffsetY = clickY - currentY;
             
             isDragging = true;
             
@@ -671,8 +673,8 @@
                 elementData.element.style.top = currentY + 'px';
                 
                 if (selectedBox) {
-                    selectedBox.style.left = currentX + 'px';
-                    selectedBox.style.top = currentY + 'px';
+                    selectedBox.style.left = iframeRect.left + currentX + 'px';
+                    selectedBox.style.top = iframeRect.top + currentY + 'px';
                 }
                 
                 elementPosition.value = `${Math.round(currentX)}, ${Math.round(currentY)}`;
