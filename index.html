@@ -496,8 +496,9 @@
             
             selectedBox = iframeDoc.createElement('div');
             selectedBox.className = 'selected-box';
-            selectedBox.style.left = iframeRect.left + elementData.position.x + 'px';
-            selectedBox.style.top = iframeRect.top + elementData.position.y + 'px';
+            selectedBox.style.position = 'absolute';
+            selectedBox.style.left = elementData.position.x + 'px';
+            selectedBox.style.top = elementData.position.y + 'px';
             selectedBox.style.width = elementData.position.width + 'px';
             selectedBox.style.height = elementData.position.height + 'px';
             iframeDoc.body.appendChild(selectedBox);
@@ -673,8 +674,8 @@
                 elementData.element.style.top = currentY + 'px';
                 
                 if (selectedBox) {
-                    selectedBox.style.left = iframeRect.left + currentX + 'px';
-                    selectedBox.style.top = iframeRect.top + currentY + 'px';
+                    selectedBox.style.left = currentX + 'px';
+                    selectedBox.style.top = currentY + 'px';
                 }
                 
                 elementPosition.value = `${Math.round(currentX)}, ${Math.round(currentY)}`;
