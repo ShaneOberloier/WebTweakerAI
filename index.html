@@ -532,15 +532,14 @@
             allElements.forEach((item, index) => {
                 const el = item.element;
                 const rect = el.getBoundingClientRect();
-                const iframeRect = previewFrame.getBoundingClientRect();
                 
-                const relativeRect = {
-                    left: rect.left - iframeRect.left,
-                    top: rect.top - iframeRect.top,
+                const elementRect = {
+                    left: rect.left,
+                    top: rect.top,
                     width: rect.width,
                     height: rect.height,
-                    x: rect.left - iframeRect.left,
-                    y: rect.top - iframeRect.top
+                    x: rect.left,
+                    y: rect.top
                 };
                 
                 const elementInfo = {
@@ -549,8 +548,8 @@
                     tag: el.tagName.toLowerCase(),
                     className: el.className || 'no-class',
                     text: el.textContent?.trim().substring(0, 30) || '',
-                    position: relativeRect,
-                    originalPosition: { ...relativeRect },
+                    position: elementRect,
+                    originalPosition: { ...elementRect },
                     depth: item.depth
                 };
                 
@@ -563,7 +562,7 @@
                     <div class="element-name">${elementInfo.tag} ${elementInfo.className ? '.' + elementInfo.className.split(' ')[0] : ''}</div>
                     <div class="element-info">
                         <span>${elementInfo.text || 'No text'}</span>
-                        <span>${Math.round(relativeRect.width)}×${Math.round(relativeRect.height)}</span>
+                        <span>${Math.round(elementRect.width)}×${Math.round(elementRect.height)}</span>
                     </div>
                 `;
                 itemEl.addEventListener('click', (e) => {
@@ -674,8 +673,8 @@
                 elementData.element.style.top = currentY + 'px';
                 
                 if (selectedBox) {
-                    selectedBox.style.left = currentX + 'px';
-                    selectedBox.style.top = currentY + 'px';
+                    selectedBox.style.left = (currentX - iframeRect.left) + 'px';
+                    selectedBox.style.top = (currentY - iframeRect.top) + 'px';
                 }
                 
                 elementPosition.value = `${Math.round(currentX)}, ${Math.round(currentY)}`;
