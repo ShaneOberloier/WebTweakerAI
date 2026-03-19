@@ -495,10 +495,10 @@
             
             selectedBox = iframeDoc.createElement('div');
             selectedBox.className = 'selected-box';
-            selectedBox.style.left = elementData.position.x + 'px';
-            selectedBox.style.top = elementData.position.y + 'px';
-            selectedBox.style.width = elementData.position.width + 'px';
-            selectedBox.style.height = elementData.position.height + 'px';
+                    selectedBox.style.left = iframeRect.left + elementData.position.x + 'px';
+                    selectedBox.style.top = iframeRect.top + elementData.position.y + 'px';
+                    selectedBox.style.width = elementData.position.width + 'px';
+                    selectedBox.style.height = elementData.position.height + 'px';
             iframeDoc.body.appendChild(selectedBox);
             
             elementData.element.classList.add('selected');
@@ -582,14 +582,14 @@
             style.textContent = `
                 .selected-box {
                     position: absolute;
-                    border: 3px solid #4ecdc4;
+                    border: 3px solid #ff0000;
                     box-sizing: border-box;
                     pointer-events: none;
-                    background: rgba(78, 205, 196, 0.2);
+                    background: rgba(255, 0, 0, 0.3);
                     z-index: 9999;
                 }
                 .selected {
-                    outline: 3px solid #4ecdc4 !important;
+                    outline: 3px solid #ff0000 !important;
                     outline-offset: 2px !important;
                     z-index: 9998 !important;
                 }
@@ -647,11 +647,11 @@
             const iframeRect = previewFrame.getBoundingClientRect();
             const iframeDoc = previewFrame.contentDocument;
             
-            const iframeX = e.clientX - iframeRect.left;
-            const iframeY = e.clientY - iframeRect.top;
+            const iframeX = e.clientX;
+            const iframeY = e.clientY;
             
-            dragOffsetX = iframeX - currentX;
-            dragOffsetY = iframeY - currentY;
+            dragOffsetX = iframeX - currentX - iframeRect.left;
+            dragOffsetY = iframeY - currentY - iframeRect.top;
             
             isDragging = true;
             
@@ -660,11 +660,11 @@
             const moveHandler = (moveEvent) => {
                 if (!isDragging) return;
                 
-                const moveIframeX = moveEvent.clientX - iframeRect.left;
-                const moveIframeY = moveEvent.clientY - iframeRect.top;
+                const moveIframeX = moveEvent.clientX;
+                const moveIframeY = moveEvent.clientY;
                 
-                currentX = moveIframeX - dragOffsetX;
-                currentY = moveIframeY - dragOffsetY;
+                currentX = moveIframeX - dragOffsetX - iframeRect.left;
+                currentY = moveIframeY - dragOffsetY - iframeRect.top;
                 
                 elementData.position.x = currentX;
                 elementData.position.y = currentY;
@@ -673,8 +673,8 @@
                 elementData.element.style.top = currentY + 'px';
                 
                 if (selectedBox) {
-                    selectedBox.style.left = (currentX - iframeRect.left) + 'px';
-                    selectedBox.style.top = (currentY - iframeRect.top) + 'px';
+                    selectedBox.style.left = iframeRect.left + currentX + 'px';
+                    selectedBox.style.top = iframeRect.top + currentY + 'px';
                 }
                 
                 elementPosition.value = `${Math.round(currentX)}, ${Math.round(currentY)}`;
