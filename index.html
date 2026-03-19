@@ -496,8 +496,8 @@
             
             selectedBox = iframeDoc.createElement('div');
             selectedBox.className = 'selected-box';
-            selectedBox.style.left = iframeRect.left + elementData.position.x + 'px';
-            selectedBox.style.top = iframeRect.top + elementData.position.y + 'px';
+            selectedBox.style.left = elementData.position.x + 'px';
+            selectedBox.style.top = elementData.position.y + 'px';
             selectedBox.style.width = elementData.position.width + 'px';
             selectedBox.style.height = elementData.position.height + 'px';
             iframeDoc.body.appendChild(selectedBox);
@@ -637,14 +637,13 @@
             e.stopPropagation();
             
             const elementData = elementsData[selectedElement];
-            const iframeRect = previewFrame.getBoundingClientRect();
             const iframeDoc = previewFrame.contentDocument;
             
             const iframeX = e.clientX;
             const iframeY = e.clientY;
             
-            dragOffsetX = iframeX - currentX - iframeRect.left;
-            dragOffsetY = iframeY - currentY - iframeRect.top;
+            dragOffsetX = iframeX - currentX;
+            dragOffsetY = iframeY - currentY;
             
             isDragging = true;
             
@@ -653,11 +652,8 @@
             const moveHandler = (moveEvent) => {
                 if (!isDragging) return;
                 
-                const moveIframeX = moveEvent.clientX;
-                const moveIframeY = moveEvent.clientY;
-                
-                currentX = moveIframeX - dragOffsetX - iframeRect.left;
-                currentY = moveIframeY - dragOffsetY - iframeRect.top;
+                currentX = moveEvent.clientX - dragOffsetX;
+                currentY = moveEvent.clientY - dragOffsetY;
                 
                 elementData.position.x = currentX;
                 elementData.position.y = currentY;
@@ -666,8 +662,8 @@
                 elementData.element.style.top = currentY + 'px';
                 
                 if (selectedBox) {
-                    selectedBox.style.left = iframeRect.left + currentX + 'px';
-                    selectedBox.style.top = iframeRect.top + currentY + 'px';
+                    selectedBox.style.left = currentX + 'px';
+                    selectedBox.style.top = currentY + 'px';
                 }
                 
                 elementPosition.value = `${Math.round(currentX)}, ${Math.round(currentY)}`;
