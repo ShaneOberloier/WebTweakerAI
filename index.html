@@ -639,11 +639,17 @@
             const elementData = elementsData[selectedElement];
             const iframeDoc = previewFrame.contentDocument;
             
-            const iframeX = e.clientX;
-            const iframeY = e.clientY;
+            const rect = elementData.element.getBoundingClientRect();
+            const iframeRect = previewFrame.getBoundingClientRect();
             
-            dragOffsetX = iframeX - currentX;
-            dragOffsetY = iframeY - currentY;
+            const elementX = rect.left - iframeRect.left;
+            const elementY = rect.top - iframeRect.top;
+            
+            const clickX = e.clientX - iframeRect.left;
+            const clickY = e.clientY - iframeRect.top;
+            
+            dragOffsetX = clickX - elementX;
+            dragOffsetY = clickY - elementY;
             
             isDragging = true;
             
@@ -652,8 +658,11 @@
             const moveHandler = (moveEvent) => {
                 if (!isDragging) return;
                 
-                currentX = moveEvent.clientX - dragOffsetX;
-                currentY = moveEvent.clientY - dragOffsetY;
+                const moveX = moveEvent.clientX - iframeRect.left;
+                const moveY = moveEvent.clientY - iframeRect.top;
+                
+                currentX = moveX - dragOffsetX;
+                currentY = moveY - dragOffsetY;
                 
                 elementData.position.x = currentX;
                 elementData.position.y = currentY;
