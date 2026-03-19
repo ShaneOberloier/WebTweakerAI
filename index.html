@@ -501,8 +501,6 @@
             selectedBox.style.width = elementData.position.width + 'px';
             selectedBox.style.height = elementData.position.height + 'px';
             iframeDoc.body.appendChild(selectedBox);
-            
-            elementData.element.classList.add('selected');
         }
 
         function traverseAndBuildTree(root, depth = 0) {
@@ -589,11 +587,6 @@
                     background: rgba(255, 0, 0, 0.3);
                     z-index: 9999;
                 }
-                .selected {
-                    outline: 3px solid #ff0000 !important;
-                    outline-offset: 2px !important;
-                    z-index: 9998 !important;
-                }
             `;
             iframeDoc.head.appendChild(style);
         }
@@ -605,7 +598,6 @@
                 
                 const prevData = elementsData[selectedElement];
                 if (prevData && prevData.element) {
-                    prevData.element.classList.remove('selected');
                     prevData.element.classList.remove('selected-box-target');
                 }
             }
@@ -854,6 +846,10 @@
                     selectedBox.remove();
                     selectedBox = null;
                 }
+                
+                selectedElement = null;
+                propertiesPanel.style.display = 'none';
+            }
                 
                 selectedElement = null;
                 propertiesPanel.style.display = 'none';
