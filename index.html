@@ -251,13 +251,16 @@
                             background: #ddd;
                         }
 
-                        iframe .selected {
-                            outline: 2px solid #4ecdc4 !important;
-                            outline-offset: 2px !important;
-                            z-index: 9999 !important;
+                        .selected-box {
+                            position: absolute;
+                            border: 2px solid #4ecdc4;
+                            box-sizing: border-box;
+                            pointer-events: none;
+                            background: rgba(78, 205, 196, 0.1);
+                            z-index: 9999;
                         }
 
-        .output-section {
+                        .output-section {
             margin-top: 20px;
             border-top: 1px solid #ddd;
             padding-top: 16px;
@@ -425,6 +428,10 @@
         let currentScale = 1;
         let currentX = 0;
         let currentY = 0;
+        let selectedBox = null;
+        let isDragging = false;
+        let dragOffsetX = 0;
+        let dragOffsetY = 0;
         
         function loadSamplePage() {
             browserAddress.value = 'about:blank';
@@ -472,6 +479,28 @@
             setTimeout(() => {
                 extractElements();
             }, 100);
+        }
+
+        function showSelectionRect(index) {
+            if (selectedBox) {
+                selectedBox.remove();
+                selectedBox = null;
+            }
+            
+            if (index === null || !elementsData[index]) return;
+            
+            const elementData = elementsData[index];
+            const iframeDoc = previewFrame.contentDocument;
+            
+            selectedBox = iframeDoc.createElement('div');
+            selectedBox.className = 'selected-box';
+            selectedBox.style.left = elementData.position.x + 'px';
+            selectedBox.style.top = elementData.position.y + 'px';
+            selectedBox.style.width = elementData.position.width + 'px';
+            selectedBox.style.height = elementData.position.height + 'px';
+            iframeDoc.body.appendChild(selectedBox);
+            
+            elementData.element.classList.add('selected');
         }
 
         function traverseAndBuildTree(root, depth = 0) {
@@ -563,7 +592,7 @@
             const elementData = elementsData[index];
             
             if (elementData) {
-                elementData.element.classList.add('selected');
+                showSelectionRect(index);
                 
                 const item = elementList.children[index];
                 if (item) item.classList.add('selected');
@@ -581,6 +610,68 @@
                 currentX = elementData.position.x;
                 currentY = elementData.position.y;
                 currentScale = 1;
+                
+                elementData.element.addEventListener('mousedown', handleDragStart);
+            }
+        }
+
+        function handleDragStart(e) {
+            if (selectedElement === null) return;
+            
+            e.preventDefault();
+            e.stopPropagation();
+            
+            const elementData = elementsData[selectedElement];
+            const iframeRect = previewFrame.getBoundingClientRect();
+            const iframeDoc = previewFrame.contentDocument;
+            
+            const iframeX = e.clientX - iframeRect.left;
+            const iframeY = e.clientY - iframeRect.top;
+            
+            dragOffsetX = iframeX - currentX;
+            dragOffsetY = iframeY - currentY;
+            
+            isDragging = true;
+            
+            elementData.element.style.position = 'relative';
+            
+            const moveHandler = (moveEvent) => {
+                if (!isDragging) return;
+                
+                const moveIframeX = moveEvent.clientX - iframeRect.left;
+                const moveIframeY = moveEvent.clientY - iframeRect.top;
+                
+                currentX = moveIframeX - dragOffsetX;
+                currentY = moveIframeY - dragOffsetY;
+                
+                elementData.position.x = currentX;
+                elementData.position.y = currentY;
+                
+                elementData.element.style.left = currentX + 'px';
+                elementData.element.style.top = currentY + 'px';
+                
+                if (selectedBox) {
+                    selectedBox.style.left = currentX + 'px';
+                    selectedBox.style.top = currentY + 'px';
+                }
+                
+                elementPosition.value = `${Math.round(currentX)}, ${Math.round(currentY)}`;
+            };
+            
+            const upHandler = () => {
+                isDragging = false;
+                iframeDoc.removeEventListener('mousemove', moveHandler);
+                iframeDoc.removeEventListener('mouseup', upHandler);
+            };
+            
+            iframeDoc.addEventListener('mousemove', moveHandler);
+            iframeDoc.addEventListener('mouseup', upHandler);
+        }
+
+        function removeDragListeners() {
+            if (selectedElement !== null && elementsData[selectedElement]) {
+                const elementData = elementsData[selectedElement];
+                elementData.element.removeEventListener('mousedown', handleDragStart);
             }
         }
 
@@ -734,9 +825,11 @@
                 const prevItem = elementList.children[selectedElement];
                 if (prevItem) prevItem.classList.remove('selected');
                 
-                const prevData = elementsData[selectedElement];
-                if (prevData && prevData.element) {
-                    prevData.element.classList.remove('selected');
+                removeDragListeners();
+                
+                if (selectedBox) {
+                    selectedBox.remove();
+                    selectedBox = null;
                 }
                 
                 selectedElement = null;
