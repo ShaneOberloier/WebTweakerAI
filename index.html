@@ -492,13 +492,14 @@
             
             const elementData = elementsData[index];
             const iframeDoc = previewFrame.contentDocument;
+            const iframeRect = previewFrame.getBoundingClientRect();
             
             selectedBox = iframeDoc.createElement('div');
             selectedBox.className = 'selected-box';
-                    selectedBox.style.left = iframeRect.left + elementData.position.x + 'px';
-                    selectedBox.style.top = iframeRect.top + elementData.position.y + 'px';
-                    selectedBox.style.width = elementData.position.width + 'px';
-                    selectedBox.style.height = elementData.position.height + 'px';
+            selectedBox.style.left = iframeRect.left + elementData.position.x + 'px';
+            selectedBox.style.top = iframeRect.top + elementData.position.y + 'px';
+            selectedBox.style.width = elementData.position.width + 'px';
+            selectedBox.style.height = elementData.position.height + 'px';
             iframeDoc.body.appendChild(selectedBox);
             
             elementData.element.classList.add('selected');
